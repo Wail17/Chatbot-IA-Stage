@@ -70,7 +70,7 @@ def test_feedback_missing_fields() -> None:
 @patch("app.api.chat.process_feedback")
 def test_feedback_success(mock_process: AsyncMock) -> None:
     """Test successful feedback submission."""
-    mock_process.return_value = None
+    mock_process.return_value = {"status": "recorded", "draft_id": None}
 
     response = client.post(
         "/api/feedback",
@@ -83,3 +83,23 @@ def test_feedback_success(mock_process: AsyncMock) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
+
+
+@patch("app.api.chat.process_feedback")
+def test_feedback_with_correction(mock_process: AsyncMock) -> None:
+    """Test feedback with user correction creates a draft."""
+    mock_process.return_value = {"status": "recorded", "draft_id": 42}
+
+    response = client.post(
+        "/api/feedback",
+        json={
+            "conversation_id": 1,
+            "thumbs_up": False,
+            "correction": "The correct answer is...",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"
+    assert data["draft_id"] == 42

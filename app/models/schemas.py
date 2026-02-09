@@ -4,20 +4,19 @@ All API input validation and output serialization is handled through
 these models using Pydantic v2.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
-class ChatRequest(BaseModel):
-    """Incoming chat message from a user.
+# ---------------------------------------------------------------------------
+# Chat
+# ---------------------------------------------------------------------------
 
-    Attributes:
-        question: The user's question text.
-        language: Preferred language code (auto-detected if not provided).
-        session_id: Unique session identifier for conversation grouping.
-    """
+
+class ChatRequest(BaseModel):
+    """Incoming chat message from a user."""
 
     question: str = Field(..., min_length=1, max_length=2000, description="User question")
     language: Optional[str] = Field(
@@ -29,13 +28,7 @@ class ChatRequest(BaseModel):
 
 
 class SourceReference(BaseModel):
-    """A reference to the knowledge source used to generate an answer.
-
-    Attributes:
-        category: The knowledge base category.
-        question: The matched FAQ question.
-        similarity: Cosine similarity score.
-    """
+    """A reference to the knowledge source used to generate an answer."""
 
     category: str
     question: str
@@ -43,17 +36,7 @@ class SourceReference(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """Chat response returned to the user.
-
-    Attributes:
-        answer: The generated answer text.
-        confidence: Confidence score (0.0 - 1.0).
-        sources: List of knowledge base sources used.
-        used_model: Which Claude model generated the answer.
-        language: Detected or requested language.
-        conversation_id: Database ID for feedback reference.
-        session_id: Session identifier.
-    """
+    """Chat response returned to the user."""
 
     answer: str
     confidence: float = Field(..., ge=0.0, le=1.0)
@@ -64,14 +47,13 @@ class ChatResponse(BaseModel):
     session_id: str
 
 
-class FeedbackRequest(BaseModel):
-    """User feedback on a chat response.
+# ---------------------------------------------------------------------------
+# Feedback
+# ---------------------------------------------------------------------------
 
-    Attributes:
-        conversation_id: ID of the conversation being rated.
-        thumbs_up: True for positive, False for negative feedback.
-        correction: Optional corrected answer text from the user.
-    """
+
+class FeedbackRequest(BaseModel):
+    """User feedback on a chat response."""
 
     conversation_id: int = Field(..., description="Conversation ID to provide feedback on")
     thumbs_up: bool = Field(..., description="Positive or negative feedback")
@@ -81,32 +63,20 @@ class FeedbackRequest(BaseModel):
 
 
 class FeedbackResponse(BaseModel):
-    """Confirmation of feedback submission.
-
-    Attributes:
-        status: Processing status.
-        message: Human-readable confirmation message.
-    """
+    """Confirmation of feedback submission."""
 
     status: str = "ok"
     message: str
+    draft_id: Optional[int] = None
+
+
+# ---------------------------------------------------------------------------
+# Drafts
+# ---------------------------------------------------------------------------
 
 
 class QADraftSchema(BaseModel):
-    """A Q&A draft suggestion for admin review.
-
-    Attributes:
-        id: Draft ID.
-        question: The suggested question.
-        answer: The suggested answer.
-        category: Suggested category.
-        language: Language code.
-        confidence: AI confidence in this suggestion.
-        source: How this draft was generated.
-        pattern_count: Number of similar questions detected.
-        status: Review status (pending/approved/rejected).
-        created_at: When this draft was created.
-    """
+    """A Q&A draft suggestion for admin review."""
 
     id: int
     question: str
@@ -123,32 +93,39 @@ class QADraftSchema(BaseModel):
 
 
 class QADraftReview(BaseModel):
-    """Admin review action on a Q&A draft.
+    """Admin review action on a Q&A draft (approve/reject)."""
 
-    Attributes:
-        action: Approve or reject the draft.
-        reviewer_note: Optional note explaining the decision.
-        corrected_answer: Optional corrected answer text.
-    """
-
-    action: str = Field(..., pattern="^(approve|reject)$", description="approve or reject")
+    action: str = Field(
+        ..., pattern="^(approve|reject)$", description="approve or reject"
+    )
     reviewer_note: Optional[str] = Field(None, max_length=1000)
     corrected_answer: Optional[str] = Field(None, max_length=5000)
+    corrected_question: Optional[str] = Field(None, max_length=2000)
+
+
+class DraftEditRequest(BaseModel):
+    """Edit request for a Q&A draft without approving/rejecting."""
+
+    edited_question: Optional[str] = Field(None, max_length=2000)
+    edited_answer: Optional[str] = Field(None, max_length=5000)
+
+
+class DraftStatsResponse(BaseModel):
+    """Statistics about Q&A drafts."""
+
+    by_status: dict[str, int]
+    by_source: dict[str, int]
+    top_categories: list[dict[str, int | str]]
+    approved_this_week: int
+
+
+# ---------------------------------------------------------------------------
+# Knowledge Base
+# ---------------------------------------------------------------------------
 
 
 class KnowledgeBaseEntry(BaseModel):
-    """A validated Q&A entry in the knowledge base.
-
-    Attributes:
-        id: Entry ID.
-        category: Topic category.
-        question: The question.
-        answer: The validated answer.
-        language: Language code.
-        source: Origin of this entry.
-        is_active: Whether currently active.
-        created_at: When created.
-    """
+    """A validated Q&A entry in the knowledge base."""
 
     id: int
     category: str
@@ -162,15 +139,29 @@ class KnowledgeBaseEntry(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class HealthResponse(BaseModel):
-    """Health check response.
+class KnowledgeBaseUpdate(BaseModel):
+    """Request to update an existing Q&A entry."""
 
-    Attributes:
-        status: Service status.
-        environment: Current environment.
-        features: Active feature flags.
-        version: Application version.
-    """
+    question: str = Field(..., min_length=1, max_length=2000)
+    answer: str = Field(..., min_length=1, max_length=5000)
+
+
+class KnowledgeBaseCreate(BaseModel):
+    """Request to create a new Q&A entry."""
+
+    question: str = Field(..., min_length=1, max_length=2000)
+    answer: str = Field(..., min_length=1, max_length=5000)
+    category: str = Field(..., min_length=1, max_length=100)
+    language: str = Field(default="nl", max_length=5)
+
+
+# ---------------------------------------------------------------------------
+# Health & Analytics
+# ---------------------------------------------------------------------------
+
+
+class HealthResponse(BaseModel):
+    """Health check response."""
 
     status: str = "healthy"
     environment: str
@@ -179,17 +170,7 @@ class HealthResponse(BaseModel):
 
 
 class PerformanceStats(BaseModel):
-    """Weekly performance statistics.
-
-    Attributes:
-        week_number: ISO week number.
-        total_conversations: Total interactions.
-        avg_confidence: Average confidence score.
-        thumbs_up_count: Positive feedback count.
-        thumbs_down_count: Negative feedback count.
-        escalation_count: Escalation count.
-        new_qa_learned: New Q&A pairs learned.
-    """
+    """Weekly performance statistics."""
 
     week_number: int
     total_conversations: int
@@ -200,3 +181,18 @@ class PerformanceStats(BaseModel):
     new_qa_learned: int
 
     model_config = {"from_attributes": True}
+
+
+class WeeklyAnalytics(BaseModel):
+    """Detailed weekly analytics for the dashboard."""
+
+    week_start: Optional[str] = None
+    week_number: int
+    total_conversations: int
+    avg_confidence: float
+    thumbs_up_count: int
+    thumbs_down_count: int
+    escalation_count: int
+    new_qa_learned: int
+    success_rate: float
+    top_unanswered: list[str] = Field(default_factory=list)

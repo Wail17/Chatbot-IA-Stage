@@ -7,7 +7,7 @@ Human-in-the-Loop learning pipeline.
 from fastapi import APIRouter, HTTPException
 
 from app.models.schemas import FeedbackResponse
-from app.services.learning_engine import run_learning_cycle, get_learning_stats
+from app.services.learning_engine import run_nightly_learning as run_learning_cycle, get_learning_stats
 from app.utils.logger import logger
 
 router = APIRouter()

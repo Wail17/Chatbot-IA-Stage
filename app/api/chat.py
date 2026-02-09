@@ -95,7 +95,7 @@ async def submit_feedback(request: FeedbackRequest) -> FeedbackResponse:
     )
 
     try:
-        await process_feedback(
+        result = await process_feedback(
             conversation_id=request.conversation_id,
             thumbs_up=request.thumbs_up,
             correction=request.correction,
@@ -105,7 +105,11 @@ async def submit_feedback(request: FeedbackRequest) -> FeedbackResponse:
         if request.correction:
             message = "Thank you! Your correction will be reviewed by our team."
 
-        return FeedbackResponse(status="ok", message=message)
+        return FeedbackResponse(
+            status="ok",
+            message=message,
+            draft_id=result.get("draft_id"),
+        )
 
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
