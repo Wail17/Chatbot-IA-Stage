@@ -21,22 +21,20 @@ _async_engine = None
 _async_session_factory = None
 
 
-def get_chroma_client() -> chromadb.ClientAPI:
-    """Get or create the ChromaDB persistent client.
-
-    Returns:
-        ChromaDB client instance.
-    """
+def get_chroma_client():
+    """Get or create ChromaDB client."""
     global _chroma_client
+    
     if _chroma_client is None:
-        _chroma_client = chromadb.Client(ChromaSettings(
-            chroma_db_impl="duckdb+parquet",
-            persist_directory="data/chroma_db",
-            anonymized_telemetry=False,
-        ))
-        logger.info("ChromaDB client initialized at data/chroma_db")
+        # Path for ChromaDB storage
+        chroma_path = "data/chroma_db"
+        
+        # Use PersistentClient
+        _chroma_client = chromadb.PersistentClient(
+            path=chroma_path
+        )
+    
     return _chroma_client
-
 
 def get_collection() -> chromadb.Collection:
     """Get the FAQ collection from ChromaDB.
