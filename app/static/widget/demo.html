@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zwembad Chatbot Widget - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #e0f2ff 0%, #b3d9ff 50%, #80bfff 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    .demo-page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      color: #0052a3;
+    }
+    p { font-size: 1.1rem; color: #555; margin-bottom: 20px; }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-top: 40px;
+      text-align: left;
+    }
+    .card h2 { margin-bottom: 12px; color: #0066cc; }
+    .card pre {
+      background: #f4f4f4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    .arrow {
+      font-size: 3rem;
+      position: fixed;
+      bottom: 30px;
+      right: 100px;
+      animation: point 1.5s ease-in-out infinite;
+      z-index: 9998;
+    }
+    @keyframes point {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(12px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-page">
+    <h1>Zwembad.eu AI Chatbot</h1>
+    <p>Klik op de blauwe bubbel rechtsonder om de chatbot te openen.</p>
+
+    <div class="card">
+      <h2>Integratie</h2>
+      <p>Voeg deze regel toe aan je website:</p>
+      <pre>&lt;script src="https://chatbot-zwembad.railway.app/static/widget/widget.js"&gt;&lt;/script&gt;</pre>
+    </div>
+
+    <div class="card">
+      <h2>Test vragen</h2>
+      <p>Probeer deze vragen in de chatbot:</p>
+      <ul style="padding-left:20px; line-height:2">
+        <li>Wat kost een zwembad?</li>
+        <li>Hoe onderhoud ik mijn zwembad?</li>
+        <li>Welke warmtepomp heb ik nodig?</li>
+        <li>Wat is de levertijd?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="arrow">&#x1F449;</div>
+  <script src="widget.js"></script>
+</body>
+</html>
