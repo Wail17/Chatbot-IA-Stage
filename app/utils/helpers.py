@@ -99,7 +99,7 @@ def now_utc() -> datetime:
     Returns:
         Current datetime in UTC timezone.
     """
-    return datetime.now(timezone.utc)
+    return datetime.utcnow()
 
 
 def calculate_iso_week(dt: datetime) -> int:

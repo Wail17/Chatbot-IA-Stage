@@ -719,7 +719,7 @@ async def reject_draft(
                 .where(QADraft.id == draft_id)
                 .values(
                     status="rejected",
-                    reviewed_at=datetime.now(timezone.utc),
+                    reviewed_at=datetime.now(),
                     reviewer_note=reviewer_note,
                 )
             )
