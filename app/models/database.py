@@ -6,6 +6,7 @@ Defines all database tables using SQLAlchemy 2.0 declarative style:
 - qa_drafts: AI-generated Q&A suggestions pending client validation
 - qa_mismatch_signals: Negative feedback and correction tracking
 - weekly_performance: Weekly analytics aggregation
+- feature_flag_overrides: Manual feature flag overrides (dev dashboard)
 """
 
 from datetime import datetime
@@ -229,3 +230,33 @@ class WeeklyPerformance(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
+
+
+class FeatureFlagOverride(Base):
+    """Manual feature flag overrides for the developer dashboard.
+
+    Allows developers to enable/disable features independently of the
+    date-based activation schedule. Overrides take priority over
+    date-based and env-var-based settings.
+
+    Attributes:
+        id: Primary key.
+        feature_name: Name of the feature (multilingual, b2b, etc.).
+        enabled: Whether the feature is force-enabled or force-disabled.
+        override_by: Name of the developer who set the override.
+        override_at: When the override was last changed.
+        notes: Reason for the override.
+    """
+
+    __tablename__ = "feature_flag_overrides"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    feature_name: Mapped[str] = mapped_column(
+        String(50), unique=True, nullable=False, index=True
+    )
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    override_by: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    override_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

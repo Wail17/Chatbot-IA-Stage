@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     feature_youtube_date: str = "2025-05-02"
     feature_crm_date: str = "2025-05-22"
 
+    # Dev Dashboard
+    dev_password: str = "dev123"
+
     # Learning Engine
     min_pattern_cluster_size: int = 5
     auto_draft_threshold: float = 0.80

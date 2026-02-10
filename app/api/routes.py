@@ -10,6 +10,7 @@ from app.api.chat import router as chat_router
 from app.api.admin import router as admin_router
 from app.api.learning import router as learning_router
 from app.api.health import router as health_router
+from app.api.dev import router as dev_router
 
 
 def register_routes(app: FastAPI) -> None:
@@ -22,3 +23,4 @@ def register_routes(app: FastAPI) -> None:
     app.include_router(chat_router, prefix="/api", tags=["Chat"])
     app.include_router(admin_router, prefix="/api/admin", tags=["Admin"])
     app.include_router(learning_router, prefix="/api/learning", tags=["Learning"])
+    app.include_router(dev_router, prefix="/dev", tags=["Developer"])
