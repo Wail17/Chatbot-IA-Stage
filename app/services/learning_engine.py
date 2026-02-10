@@ -672,7 +672,7 @@ async def approve_draft(
                 .where(QADraft.id == draft_id)
                 .values(
                     status="approved",
-                    reviewed_at=datetime.now(timezone.utc),
+                    reviewed_at=datetime.now(),  # Sans timezone!
                     reviewer_note=reviewer_note,
                     question=final_question,
                     answer=final_answer,
