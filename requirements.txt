@@ -16,7 +16,7 @@ psycopg2-binary==2.9.9
 alembic==1.13.1
 
 # ML/Clustering
-numpy>=1.24.0
+numpy>=1.24.0,<2.0.0
 
 # Utilities
 langdetect==1.0.9
